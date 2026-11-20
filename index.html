@@ -224,7 +224,7 @@
       });
     });
     // Replace this placeholder with your free access key from web3forms.com to deliver bookings privately to your email.
-    const WEB3FORMS_ACCESS_KEY = "YOUR_WEB3FORMS_ACCESS_KEY";
+    const WEB3FORMS_ACCESS_KEY = "33fdd6b3-3a9f-45e4-9a03-0343e4b46653";
     const WHATSAPP_NUMBER = "962798471957";
 
     // FAQ accordion
@@ -288,7 +288,7 @@
       ].join('\n');
       const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(summary)}`;
 
-      if (WEB3FORMS_ACCESS_KEY === 'YOUR_WEB3FORMS_ACCESS_KEY') {
+      if (WEB3FORMS_ACCESS_KEY === '33fdd6b3-3a9f-45e4-9a03-0343e4b46653') {
         // Open synchronously from the user's submit action to avoid popup blockers.
         window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
         setFormStatus('تم تجهيز طلبك. أُرسل ملخص التفاصيل إلى واتساب لبدء تأكيد الموعد مباشرة.', 'success', whatsappUrl);
