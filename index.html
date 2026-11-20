@@ -52,7 +52,7 @@
 <body>
   <header class="site-header">
     <div class="container header-inner">
-      <a class="brand" href="#top" aria-label="فضفضة معي — زياد شنبور، الصفحة الرئيسية"><span class="brand-mark" aria-hidden="true">ف</span><span><span class="brand-title">فضفضة معي — زياد شنبور</span><span class="brand-subtitle">   مساحة آمنة واحد لواحد</span></span></a>
+      <a class="brand" href="#top" aria-label="فضفضة معي — زياد شنبور، الصفحة الرئيسية"><span class="brand-mark" aria-hidden="true">ف</span><span><span class="brand-title">فضفضة معي — زياد شنبور</span><span class="brand-subtitle">مساحة آمنة · واحد لواحد</span></span></a>
       <nav class="main-nav" id="main-nav" aria-label="التنقل الرئيسي">
         <a href="#about">من أنا</a><a href="#experience">الخبرات</a><a href="#books">مؤلفاتي</a><a href="#offers">ما نقدمه</a><a href="#daily-path">مسارك اليومي</a><a href="#meditation">الدورات</a><a href="#brainwaves">الموجات والصحة</a><a href="#faq">الأسئلة الشائعة</a>
         <div class="mobile-actions"><a class="btn btn-primary btn-sm" href="#booking">احجز جلستك</a><a class="btn btn-whatsapp btn-sm" href="https://wa.me/962798471957" target="_blank" rel="noopener noreferrer">تواصل معي</a></div>
@@ -225,7 +225,6 @@
     });
     // Replace this placeholder with your free access key from web3forms.com to deliver bookings privately to your email.
     const WEB3FORMS_ACCESS_KEY = "33fdd6b3-3a9f-45e4-9a03-0343e4b46653";
-    const WHATSAPP_NUMBER = "962798471957";
 
     // FAQ accordion
     document.querySelectorAll('.faq-question').forEach(button => {
@@ -237,7 +236,7 @@
       });
     });
 
-    // Booking form: Web3Forms email delivery when configured, WhatsApp fallback otherwise.
+    // Booking form: all form submissions are sent only to Web3Forms.
     const bookingForm = document.getElementById('bookingForm');
     const formStatus = document.getElementById('formStatus');
     const preferredDate = document.getElementById('preferred_date');
@@ -245,20 +244,11 @@
     const localToday = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     preferredDate.min = localToday;
 
-    const setFormStatus = (message, type, whatsappUrl = '') => {
+    const setFormStatus = (message, type) => {
       formStatus.replaceChildren();
       const box = document.createElement('div');
       box.className = `status-message ${type}`;
       box.append(document.createTextNode(message));
-      if (whatsappUrl) {
-        const link = document.createElement('a');
-        link.className = 'btn btn-whatsapp btn-sm';
-        link.href = whatsappUrl;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        link.textContent = 'تأكيد وإرسال التفاصيل عبر واتساب الآن';
-        box.append(document.createElement('br'), link);
-      }
       formStatus.append(box);
     };
 
@@ -274,44 +264,22 @@
       }
       const formData = new FormData(bookingForm);
       const booking = Object.fromEntries(formData.entries());
-      const summary = [
-        'مرحباً زياد، أود إرسال طلب حجز جلسة:',
-        '',
-        `الاسم: ${booking.name}`,
-        `رقم الهاتف / واتساب: ${booking.phone}`,
-        `البريد الإلكتروني: ${booking.email}`,
-        `نوع الجلسة أو الاهتمام: ${booking.service}`,
-        `التاريخ المفضل: ${booking.preferred_date}`,
-        `الوقت المفضل: ${booking.preferred_time}`,
-        `طريقة التواصل المفضلة: ${booking.contact_method}`,
-        `وصف مختصر: ${booking.notes}`
-      ].join('\n');
-      const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(summary)}`;
-
-      if (WEB3FORMS_ACCESS_KEY === '33fdd6b3-3a9f-45e4-9a03-0343e4b46653') {
-        // Open synchronously from the user's submit action to avoid popup blockers.
-        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-        setFormStatus('تم تجهيز طلبك. أُرسل ملخص التفاصيل إلى واتساب لبدء تأكيد الموعد مباشرة.', 'success', whatsappUrl);
-        return;
-      }
-
       const submitButton = bookingForm.querySelector('[type="submit"]');
       submitButton.disabled = true;
       submitButton.setAttribute('aria-busy', 'true');
-      setFormStatus('جارٍ إرسال طلبك بأمان، لحظات من فضلك…', 'success');
+      setFormStatus('جاري إرسال طلب الحجز...', 'success');
       try {
         const response = await fetch('https://api.web3forms.com/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({ access_key: WEB3FORMS_ACCESS_KEY, subject: 'طلب حجز جلسة — فضفضة معي', from_name: 'فضفضة معي — طلب حجز', ...booking })
         });
-        const result = await response.json();
-        if (!response.ok || !result.success) throw new Error(result.message || 'تعذر إرسال الطلب حالياً.');
-        setFormStatus('وصل طلبك بنجاح وبخصوصية. لتأكيد الموعد ومناقشة التفاصيل، يمكنك إرسال ملخص الحجز عبر واتساب الآن.', 'success', whatsappUrl);
+        if (!response.ok) throw new Error('تعذر إرسال طلب الحجز.');
         bookingForm.reset();
         preferredDate.min = localToday;
+        setFormStatus('تم استلام طلب حجزك بنجاح! سيتواصل معك المرشد زياد شنبور قريباً لتأكيد الموعد.', 'success');
       } catch (error) {
-        setFormStatus('لم نتمكن من إرسال الطلب إلى البريد الآن. يمكنك إكمال الحجز مباشرة عبر واتساب باستخدام التفاصيل الجاهزة.', 'error', whatsappUrl);
+        setFormStatus('تعذر إرسال طلب الحجز حالياً. يرجى المحاولة مرة أخرى، أو استخدام زر التواصل المباشر عبر واتساب.', 'error');
       } finally {
         submitButton.disabled = false;
         submitButton.removeAttribute('aria-busy');
